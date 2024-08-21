@@ -1,20 +1,12 @@
 package dk.cphbusiness.flightdemo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dk.cphbusiness.utils.Utils;
-import lombok.*;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -38,8 +30,16 @@ public class FlightReader {
                     .filter(flightInfo -> "Lufthansa".equals(flightInfo.getAirline()))
                     .mapToLong(flightInfo -> flightInfo.getDuration().toHours())
                     .sum();
-            System.out.printf("The total flight time for Lufthansa : %d hours", totalFightTime);
+            System.out.printf("The total flight time for Lufthansa : %d hours%n", totalFightTime);
 
+            //List of flights operated between two specific airports
+            String airport1 = "Finke";
+            String airport2 = "Alice Springs";
+            List<DTOs.FlightInfo> flightsBetweenAirports = flightInfoList.stream()
+                    .filter(flightInfo -> airport1.equals(flightInfo.getOrigin()) || airport1.equals(flightInfo.getDestination()) ||
+                            airport2.equals(flightInfo.getOrigin()) || airport2.equals(flightInfo.getDestination()))
+                    .collect(Collectors.toList());
+            flightsBetweenAirports.forEach(System.out::println);
         } catch (IOException e) {
             e.printStackTrace();
         }
