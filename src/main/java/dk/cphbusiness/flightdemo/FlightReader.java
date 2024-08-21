@@ -36,8 +36,6 @@ public class FlightReader {
             List<DTOs.FlightInfo> luftHansaInfo = filterByAirline(flightInfoList, "Lufthansa");
             luftHansaInfo.forEach(System.out::println);
             System.out.println(findAvgDuration(luftHansaInfo));
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,7 +66,6 @@ public class FlightReader {
         }).toList();
         return flightInfoList;
     }
-
 
     public List<DTOs.FlightDTO> getFlightsFromFile(String filename) throws IOException {
         DTOs.FlightDTO[] flights = new Utils().getObjectMapper().readValue(Paths.get(filename).toFile(), DTOs.FlightDTO[].class);
