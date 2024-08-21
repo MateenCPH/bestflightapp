@@ -1,6 +1,7 @@
 package dk.cphbusiness.flightdemo;
 
 import dk.cphbusiness.utils.Utils;
+import org.w3c.dom.ls.LSOutput;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -8,6 +9,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,7 +27,7 @@ public class FlightReader {
             List<DTOs.FlightDTO> flightList = flightReader.getFlightsFromFile("flights.json");
             List<DTOs.FlightInfo> flightInfoList = flightReader.getFlightInfoDetails(flightList);
             flightInfoList.forEach(f -> {
-                //System.out.println("\n" + f);
+                System.out.println("\n" + f);
             });
 
             //Calculating total flight time for a certain airline.
@@ -52,9 +54,16 @@ public class FlightReader {
             List<DTOs.FlightInfo> luftHansaInfo = filterByAirline(flightInfoList, "Lufthansa");
             luftHansaInfo.forEach(System.out::println);
             System.out.println(findAvgDuration(luftHansaInfo));
+
+            Map<String, Double> avgDurationPerAirline = getAvgDurationPerAirline(flightInfoList);
+            avgDurationPerAirline.forEach((airline, avgDuration) ->
+                    System.out.println(airline + ": " + avgDuration + " minutes"));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
 
 
@@ -96,9 +105,20 @@ public class FlightReader {
                 .collect(Collectors.toList());
     }
 
+    public static Map<String, Double> getAvgDurationPerAirline(List<DTOs.FlightInfo> flightInfos) {
+        return flightInfos.stream()
+                .collect(Collectors.groupingBy(
+                        flightInfo -> flightInfo.getAirline() != null ? flightInfo.getAirline() : "Unknown Airline",  // Provide default value
+                        Collectors.averagingDouble(flightInfo -> flightInfo.getDuration().toMinutes())
+                ));
+    }
+
+
     public static double findAvgDuration(List<DTOs.FlightInfo> flightInfos) {
         return flightInfos.stream()
                 .mapToLong(flightInfo -> flightInfo.getDuration().toMinutes())
                 .average().orElse(0.0);
     }
+
+
 }
