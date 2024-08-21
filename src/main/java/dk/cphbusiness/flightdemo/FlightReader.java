@@ -5,8 +5,8 @@ import dk.cphbusiness.utils.Utils;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.Arrays;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,12 +30,7 @@ public class FlightReader {
             System.out.printf("The total flight time for Lufthansa : %d hours%n", calculateTotalFlightTime(flightInfoList));
 
             //List of flights operated between two specific airports
-            String airport1 = "Finke";
-            String airport2 = "Alice Springs";
-            List<DTOs.FlightInfo> flightsBetweenAirports = flightInfoList.stream()
-                    .filter(flightInfo -> airport1.equals(flightInfo.getOrigin()) || airport1.equals(flightInfo.getDestination()) ||
-                            airport2.equals(flightInfo.getOrigin()) || airport2.equals(flightInfo.getDestination()))
-                    .collect(Collectors.toList());
+            List<DTOs.FlightInfo> flightsBetweenAirports = getFlightsOperatingBetweenTwoAirports(flightInfoList, "Finke", "Alice Springs");
             flightsBetweenAirports.forEach(System.out::println);
 
             //All flights departing before 08:00
@@ -101,5 +96,12 @@ public class FlightReader {
                 .filter(flightInfo -> "Lufthansa".equals(flightInfo.getAirline()))
                 .mapToLong(flightInfo -> flightInfo.getDuration().toHours())
                 .sum();
+    }
+
+    public static List<DTOs.FlightInfo> getFlightsOperatingBetweenTwoAirports(List<DTOs.FlightInfo> flightInfoList, String airport1, String airport2) {
+        return flightInfoList.stream()
+                .filter(flightInfo -> airport1.equals(flightInfo.getOrigin()) || airport1.equals(flightInfo.getDestination()) ||
+                        airport2.equals(flightInfo.getOrigin()) || airport2.equals(flightInfo.getDestination()))
+                .collect(Collectors.toList());
     }
 }
