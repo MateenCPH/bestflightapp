@@ -30,7 +30,7 @@ public class FlightReader {
                     .filter(flightInfo -> "Lufthansa".equals(flightInfo.getAirline()))
                     .mapToLong(flightInfo -> flightInfo.getDuration().toHours())
                     .sum();
-            System.out.printf("The total flight time for Lufthansa : %d hours", totalFightTime);
+            System.out.printf("The total flight time for Lufthansa : %d hours%n", totalFightTime);
 
             //List of flights operated between two specific airports
             String airport1 = "Finke";
