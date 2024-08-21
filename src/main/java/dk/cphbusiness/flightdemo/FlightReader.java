@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,10 +41,15 @@ public class FlightReader {
                             airport2.equals(flightInfo.getOrigin()) || airport2.equals(flightInfo.getDestination()))
                     .collect(Collectors.toList());
             flightsBetweenAirports.forEach(System.out::println);
+
+            //All flights departing before 08:00
+            flightInfoList.stream()
+                    .filter(flightInfo -> flightInfo.getDeparture().toLocalTime().isBefore(LocalTime.of(8, 0)))
+                    .forEach(System.out::println);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
 
