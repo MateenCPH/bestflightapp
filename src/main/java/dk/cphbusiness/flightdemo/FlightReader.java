@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Purpose:
@@ -23,7 +25,7 @@ public class FlightReader {
             List<DTOs.FlightDTO> flightList = flightReader.getFlightsFromFile("flights.json");
             List<DTOs.FlightInfo> flightInfoList = flightReader.getFlightInfoDetails(flightList);
             flightInfoList.forEach(f -> {
-                System.out.println("\n" + f);
+                //System.out.println("\n" + f);
             });
 
             //Calculating total flight time for a certain airline.
@@ -47,6 +49,9 @@ public class FlightReader {
                     .filter(flightInfo -> flightInfo.getDeparture().toLocalTime().isBefore(LocalTime.of(8, 0)))
                     .forEach(System.out::println);
 
+            List<DTOs.FlightInfo> luftHansaInfo = filterByAirline(flightInfoList, "Lufthansa");
+            luftHansaInfo.forEach(System.out::println);
+            System.out.println(findAvgDuration(luftHansaInfo));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,5 +90,15 @@ public class FlightReader {
         return flightList;
     }
 
+    public static List<DTOs.FlightInfo> filterByAirline(List<DTOs.FlightInfo> flightInfos, String airline) {
+        return flightInfos.stream()
+                .filter(flightInfo -> airline.equals(flightInfo.getAirline()))
+                .collect(Collectors.toList());
+    }
 
+    public static double findAvgDuration(List<DTOs.FlightInfo> flightInfos) {
+        return flightInfos.stream()
+                .mapToLong(flightInfo -> flightInfo.getDuration().toMinutes())
+                .average().orElse(0.0);
+    }
 }
