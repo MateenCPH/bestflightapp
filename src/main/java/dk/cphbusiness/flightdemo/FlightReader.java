@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Purpose:
@@ -28,12 +29,21 @@ public class FlightReader {
         try {
             List<DTOs.FlightDTO> flightList = flightReader.getFlightsFromFile("flights.json");
             List<DTOs.FlightInfo> flightInfoList = flightReader.getFlightInfoDetails(flightList);
-            flightInfoList.forEach(f->{
-                System.out.println("\n"+f);
+            flightInfoList.forEach(f -> {
+                System.out.println("\n" + f);
             });
+
+            //Calculating total flight time for a certain airline.
+            long totalFightTime = flightInfoList.stream()
+                    .filter(flightInfo -> "Lufthansa".equals(flightInfo.getAirline()))
+                    .mapToLong(flightInfo -> flightInfo.getDuration().toHours())
+                    .sum();
+            System.out.printf("The total flight time for Lufthansa : %d hours", totalFightTime);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
 
