@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Purpose:
@@ -29,11 +27,7 @@ public class FlightReader {
             });
 
             //Calculating total flight time for a certain airline.
-            long totalFightTime = flightInfoList.stream()
-                    .filter(flightInfo -> "Lufthansa".equals(flightInfo.getAirline()))
-                    .mapToLong(flightInfo -> flightInfo.getDuration().toHours())
-                    .sum();
-            System.out.printf("The total flight time for Lufthansa : %d hours%n", totalFightTime);
+            System.out.printf("The total flight time for Lufthansa : %d hours%n", calculateTotalFlightTime(flightInfoList));
 
             //List of flights operated between two specific airports
             String airport1 = "Finke";
@@ -100,5 +94,12 @@ public class FlightReader {
         return flightInfos.stream()
                 .mapToLong(flightInfo -> flightInfo.getDuration().toMinutes())
                 .average().orElse(0.0);
+    }
+
+    public static long calculateTotalFlightTime(List<DTOs.FlightInfo> flightInfoList) {
+        return flightInfoList.stream()
+                .filter(flightInfo -> "Lufthansa".equals(flightInfo.getAirline()))
+                .mapToLong(flightInfo -> flightInfo.getDuration().toHours())
+                .sum();
     }
 }
