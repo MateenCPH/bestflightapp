@@ -86,6 +86,3 @@ public class FlightReader {
                 .average().orElse(0.0);
     }
 }
-
-
-
