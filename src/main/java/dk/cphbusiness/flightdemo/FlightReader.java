@@ -1,18 +1,15 @@
 package dk.cphbusiness.flightdemo;
 
 import dk.cphbusiness.utils.Utils;
-import org.w3c.dom.ls.LSOutput;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.Arrays;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Purpose:
@@ -31,19 +28,10 @@ public class FlightReader {
             });
 
             //Calculating total flight time for a certain airline.
-            long totalFightTime = flightInfoList.stream()
-                    .filter(flightInfo -> "Lufthansa".equals(flightInfo.getAirline()))
-                    .mapToLong(flightInfo -> flightInfo.getDuration().toHours())
-                    .sum();
-            System.out.printf("The total flight time for Lufthansa : %d hours%n", totalFightTime);
+            System.out.printf("The total flight time for Lufthansa : %d hours%n", calculateTotalFlightTime(flightInfoList));
 
             //List of flights operated between two specific airports
-            String airport1 = "Finke";
-            String airport2 = "Alice Springs";
-            List<DTOs.FlightInfo> flightsBetweenAirports = flightInfoList.stream()
-                    .filter(flightInfo -> airport1.equals(flightInfo.getOrigin()) || airport1.equals(flightInfo.getDestination()) ||
-                            airport2.equals(flightInfo.getOrigin()) || airport2.equals(flightInfo.getDestination()))
-                    .collect(Collectors.toList());
+            List<DTOs.FlightInfo> flightsBetweenAirports = getFlightsOperatingBetweenTwoAirports(flightInfoList, "Finke", "Alice Springs");
             flightsBetweenAirports.forEach(System.out::println);
 
             //All flights departing before 08:00
@@ -62,8 +50,6 @@ public class FlightReader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
 
@@ -120,5 +106,17 @@ public class FlightReader {
                 .average().orElse(0.0);
     }
 
+    public static long calculateTotalFlightTime(List<DTOs.FlightInfo> flightInfoList) {
+        return flightInfoList.stream()
+                .filter(flightInfo -> "Lufthansa".equals(flightInfo.getAirline()))
+                .mapToLong(flightInfo -> flightInfo.getDuration().toHours())
+                .sum();
+    }
 
+    public static List<DTOs.FlightInfo> getFlightsOperatingBetweenTwoAirports(List<DTOs.FlightInfo> flightInfoList, String airport1, String airport2) {
+        return flightInfoList.stream()
+                .filter(flightInfo -> airport1.equals(flightInfo.getOrigin()) || airport1.equals(flightInfo.getDestination()) ||
+                        airport2.equals(flightInfo.getOrigin()) || airport2.equals(flightInfo.getDestination()))
+                .collect(Collectors.toList());
+    }
 }
