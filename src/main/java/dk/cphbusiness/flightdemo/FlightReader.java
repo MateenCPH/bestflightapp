@@ -1,20 +1,15 @@
 package dk.cphbusiness.flightdemo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dk.cphbusiness.utils.Utils;
-import lombok.*;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.*;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Purpose:
@@ -28,9 +23,30 @@ public class FlightReader {
         try {
             List<DTOs.FlightDTO> flightList = flightReader.getFlightsFromFile("flights.json");
             List<DTOs.FlightInfo> flightInfoList = flightReader.getFlightInfoDetails(flightList);
-            flightInfoList.forEach(f->{
-                System.out.println("\n"+f);
+            flightInfoList.forEach(f -> {
+                System.out.println("\n" + f);
             });
+
+            //Calculating total flight time for a certain airline.
+            System.out.printf("The total flight time for Lufthansa : %d hours%n", calculateTotalFlightTime(flightInfoList));
+
+            //List of flights operated between two specific airports
+            List<DTOs.FlightInfo> flightsBetweenAirports = getFlightsOperatingBetweenTwoAirports(flightInfoList, "Finke", "Alice Springs");
+            flightsBetweenAirports.forEach(System.out::println);
+
+            //All flights departing before 08:00
+            flightInfoList.stream()
+                    .filter(flightInfo -> flightInfo.getDeparture().toLocalTime().isBefore(LocalTime.of(8, 0)))
+                    .forEach(System.out::println);
+
+            List<DTOs.FlightInfo> luftHansaInfo = filterByAirline(flightInfoList, "Lufthansa");
+            luftHansaInfo.forEach(System.out::println);
+            System.out.println(findAvgDuration(luftHansaInfo));
+
+            Map<String, Double> avgDurationPerAirline = getAvgDurationPerAirline(flightInfoList);
+            avgDurationPerAirline.forEach((airline, avgDuration) ->
+                    System.out.println(airline + ": " + avgDuration + " minutes"));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -69,5 +85,38 @@ public class FlightReader {
         return flightList;
     }
 
+    public static List<DTOs.FlightInfo> filterByAirline(List<DTOs.FlightInfo> flightInfos, String airline) {
+        return flightInfos.stream()
+                .filter(flightInfo -> airline.equals(flightInfo.getAirline()))
+                .collect(Collectors.toList());
+    }
 
+    public static Map<String, Double> getAvgDurationPerAirline(List<DTOs.FlightInfo> flightInfos) {
+        return flightInfos.stream()
+                .collect(Collectors.groupingBy(
+                        flightInfo -> flightInfo.getAirline() != null ? flightInfo.getAirline() : "Unknown Airline",  // Provide default value
+                        Collectors.averagingDouble(flightInfo -> flightInfo.getDuration().toMinutes())
+                ));
+    }
+
+
+    public static double findAvgDuration(List<DTOs.FlightInfo> flightInfos) {
+        return flightInfos.stream()
+                .mapToLong(flightInfo -> flightInfo.getDuration().toMinutes())
+                .average().orElse(0.0);
+    }
+
+    public static long calculateTotalFlightTime(List<DTOs.FlightInfo> flightInfoList) {
+        return flightInfoList.stream()
+                .filter(flightInfo -> "Lufthansa".equals(flightInfo.getAirline()))
+                .mapToLong(flightInfo -> flightInfo.getDuration().toHours())
+                .sum();
+    }
+
+    public static List<DTOs.FlightInfo> getFlightsOperatingBetweenTwoAirports(List<DTOs.FlightInfo> flightInfoList, String airport1, String airport2) {
+        return flightInfoList.stream()
+                .filter(flightInfo -> airport1.equals(flightInfo.getOrigin()) || airport1.equals(flightInfo.getDestination()) ||
+                        airport2.equals(flightInfo.getOrigin()) || airport2.equals(flightInfo.getDestination()))
+                .collect(Collectors.toList());
+    }
 }
